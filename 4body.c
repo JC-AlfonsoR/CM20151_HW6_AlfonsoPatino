@@ -26,6 +26,12 @@ importar_datos(char *filename){
 
   FILE *in;
   int i;
+  char var[50];
+  double *datos;
+
+  datos = malloc(20*sizeof(double));
+
+  in = fopen(filename, "r");
   
   if(!in)
     {
@@ -34,19 +40,14 @@ importar_datos(char *filename){
       
     }
 
-  for(i=0;i<21;i++)
+  for(i=0;i<42;i++)
     {
-      fscanf(in, "%s\n", %var);
-      printf()
+      fscanf(in, "%s \n", &var);
+      printf("%s \n", var);
 
     }
-
-  char buf[50];
-
-  file = fopen(filename,"r");
-
-  while 
+  fclose(in);
+}
   
 
-//}
 
