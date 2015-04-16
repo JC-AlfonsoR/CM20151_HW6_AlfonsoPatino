@@ -6,8 +6,17 @@
 double * importacion_datos(char *filename);
 
 
-//Funcion que retorna el valor de la aceleracíon en cada componente para usarla en la funcion rungekutta4.
-//Inputs: masas de los cuerpos que los que interactua y vectores de posicion de todos los cuatro cuerpos
+/*
+Funcion que calcula la aceleracion en cada una de la tres componentes para el cuerpo 0.
+Inputs:
+  m_1: masa del cuerpo 1
+  m_2: masa del cuerpo 2
+  m_3: masa del cuerpo 3
+  p0: vector posicion del cuerpo al que se le quiere calcular la aceleracion
+  p1: vector posicion del cuerpo 1
+  p2: vector posicion del cuerpo 2
+  p3: vector posicion del cuerpo 3
+*/
 double *ecuacion_gravedad(double m_1, double m_2, double m_3, double *p_0, double *p_1, double *p_2, double *p_3);
 
 //Implementacion de Runge_Kutta4 para el un time-step pequeno
