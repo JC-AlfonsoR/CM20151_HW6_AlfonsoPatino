@@ -23,6 +23,6 @@ v_x_ast		1570
 v_y_ast		0
 v_z_ast		29959
 M_sol		1
-m_tierra	3.003
-m_luna		3.695
-m_ast		5	
+m_tierra	0.000003003
+m_luna		0.00000003695
+m_ast		0.00000000005	
