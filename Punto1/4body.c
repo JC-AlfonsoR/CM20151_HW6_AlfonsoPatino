@@ -19,10 +19,13 @@ Inputs:
 */
 double *ecuacion_gravedad(double m_1, double m_2, double m_3, double *p_0, double *p_1, double *p_2, double *p_3);
 
-//Implementacion de Runge_Kutta4 para el un time-step pequeno
-double rungekutta4(double , double (*f)(double));
 
 
+//Implementacion de Runge_Kutta4 para el un time-step pequeno en una dimension de un solo cuerpo
+double *rungekutta4(double x_cuerpo, double y_cuerpo, double z_cuerpo);
+
+//Calculo de funcion de la derivada de la posicion en cada una de las componentes para llamarla en la funcion rungekutta.
+double *ecuacion_velocidad(double v_x_cuerpo, double v_y_cuerpo, double v_z_cuerpo);
 
 int main(int argc, char **argv){
 
@@ -37,8 +40,6 @@ int main(int argc, char **argv){
 
   //Inicializacion de variables
   filename = argv[1];
-
-
 
   //Se llama la funcion para importar los datos. Mirar el archivo ic.txt para mirar a que corresponde cada valor en el arreglo
   datos  = importacion_datos(filename);
@@ -129,7 +130,6 @@ double *ecuacion_gravedad(double m_1, double m_2, double m_3, double *p0, double
   //Calculo para componente en x
   dydt[0] = G*((m_1*(p0[0]-p1[0])/denominador1) + (m_2*(p0[0]-p2[0])/denominador2) + (m_3*(p0[0]-p3[0])/denominador3));
 
-
   //Calculo para componente en y
   dydt[1] = G*((m_1*(p0[1]-p1[1])/denominador1) + (m_2*(p0[1]-p2[1])/denominador2) + (m_3*(p0[1]-p3[1])/denominador3));
 
@@ -138,6 +138,33 @@ double *ecuacion_gravedad(double m_1, double m_2, double m_3, double *p0, double
 
   return dydt;
 }
+
+double *ecuacion_velocidad(double v_x_cuerpo, double v_y_cuerpo, double v_z_cuerpo){
+
+  double *dydt;
+
+  dydt = malloc(3*sizeof(double));
+
+  dydt[0] = v_x_cuerpo;
+  dydt[1] = v_y_cuerpo;
+  dydt[2] = v_z_cuerpo;  
+
+  return dydt;
+}
+
+double *rungekutta4(double p_cuerpo){
+
+  double *nuevas_coordenadas;
+  double k1_posicion, k1_velocidad, k2_posicion, k2_velocidad,k3_posicion, k3_velocidad,k4_posicion, k4_velocidad;
+
+  nuevas_coordenadas = malloc(3*sizeof(double));
+
+  return nuevas_coordenadas;
+
+} 
+
+
+
 
   
 
