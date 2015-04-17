@@ -19,10 +19,8 @@ Inputs:
 */
 double *ecuacion_gravedad(double m_1, double m_2, double m_3, double *p_0, double *p_1, double *p_2, double *p_3);
 
-
-
 //Implementacion de Runge_Kutta4 para el un time-step pequeno en una dimension de un solo cuerpo
-double *rungekutta4(double x_cuerpo, double y_cuerpo, double z_cuerpo);
+double *rungekutta4(double p_cuerpo, double v_cuerpo);
 
 //Calculo de funcion de la derivada de la posicion en cada una de las componentes para llamarla en la funcion rungekutta.
 double *ecuacion_velocidad(double v_x_cuerpo, double v_y_cuerpo, double v_z_cuerpo);
@@ -89,7 +87,7 @@ double * importacion_datos(char *filename){
   char valor[10]; 
 
   //Memory allocation de los punteros
-  datos = malloc(28*sizeof(double));  
+  datos = malloc(27*sizeof(double));  
 
   in = fopen(filename, "r");
   
@@ -152,12 +150,54 @@ double *ecuacion_velocidad(double v_x_cuerpo, double v_y_cuerpo, double v_z_cuer
   return dydt;
 }
 
-double *rungekutta4(double p_cuerpo){
+/*
+Se debe tener en cuenta la posicion de la particula en la componente
+y la distancia (denominador) para cada una de las particulas. Se escribe
+por ahora en terminos de los denominadores. Se debe modificar la funcion
+ecuacion_gravedad
+ */
+
+double *rungekutta4(double p_cuerpo, double den1, double den2, double den3, double v_cuerpo, double m1, double m2, double m3, double tiempo){
 
   double *nuevas_coordenadas;
   double k1_posicion, k1_velocidad, k2_posicion, k2_velocidad,k3_posicion, k3_velocidad,k4_posicion, k4_velocidad;
 
   nuevas_coordenadas = malloc(3*sizeof(double));
+
+  k1_posicion = ecuacion_velocidad(v_cuerpo);
+  k1_velocidad = ecuacion_gravedad(m1, m2, m3, p_cuerpo, den1, den2, den3);
+
+  //Primer paso
+  tiempo_1 = tiempo + h*0.5;
+  p_1 = p_cuerpo + h*0.5*k1_posicion;
+  v_1 = v_cuerpo + h*0.5*k1_velocidad;
+  k2_posicion = ecuacion_velocidad(v_1);
+  k2_velocidad = ecuacion_gravedad(m1, m2, m3, p_1, den1, den2, den3);
+
+  //Segundo paso
+  tiempo_2 = tiempo + h*0.5;
+  p_2 = p_cuerpo + h*0.5*k2_posicion;
+  v_2 = v_cuerpo + h*0.5*k2_velocidad;
+  k3_posicion = ecuacion_velocidad(v_2);
+  k3_velocidad = ecuacion_gravedad(m1, m2, m3, p_2, den1, den2, den3);
+
+  //Tercer paso
+  tiempo_3 = tiempo + h;
+  p_3 = p_cuerpo + h*k3_posicion;
+  v_3 = v_cuerpo + h*k3_velocidad;
+  k4_posicion = ecuacion_velocidad(v_1);
+  k4_velocidad = ecuacion_gravedad(m1, m2, m3, p_3, den1, den2, den3);
+
+  //Cuarto paso
+  kprom_posicion = (1.0/6.0)*(k1_posicion+2.0*k2_posicion+2.0*k3_posicion+k4_posicion);
+  kprom_velocidad = (1.0/6.0)*(k1_velocidad+2.0*k2_velocidad+2.0*k3_velocidad+k4_velocidad);
+
+  //Creacion de nuevos valores
+  p_nueva = p_cuerpo + h*kprom_posicion;
+  v_nueva = v_cuerpo + v_cuerpo + h*kprom_velocidad;
+
+  nuevas_coordenadas[0] = p_nueva;
+  nuevas_coordenadas[1] = v_nueva;
 
   return nuevas_coordenadas;
 
