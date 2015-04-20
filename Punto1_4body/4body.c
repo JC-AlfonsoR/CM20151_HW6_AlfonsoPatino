@@ -1,7 +1,8 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <math.h>
-#define G_GRAV 39.486//6.67384E-11;
+#include <string.h>
+#define G_GRAV 39.486 //units of ua+3 msun-1 year-1
 #define FLOAT float
 
 /*
@@ -48,29 +49,37 @@ Output = aceleracion en una de las componentes para el cuerpo 0
 FLOAT ecuacion_gravedad(FLOAT m_1, FLOAT m_2, FLOAT m_3, FLOAT p0, FLOAT p1, FLOAT p2, FLOAT p3, FLOAT den1, FLOAT den2, FLOAT den3);
 
 
-FLOAT ecuacion_velocidad(FLOAT v_cuerpo);
-
-
-//Implementacion de Runge_Kutta4 para el un time-step pequeno en una dimension de un solo cuerpo
-FLOAT *rungekutta4(FLOAT p_cuerpo, FLOAT p1, FLOAT p2, FLOAT p3,  FLOAT den1, FLOAT den2, FLOAT den3, FLOAT v_cuerpo, FLOAT m1, FLOAT m2, FLOAT m3, FLOAT h);
+/*
+Funcion que implementa el metodo de Runge-Kutta a cuarto orden para solucionar la ecuacion diferencial de la gravedad
+Inputs:
+  p_cuerpo: posicion del cuerpo cero
+  p1, p2, p3: posiciones de los cuerpos 1, 2, y 3 respectivamente
+  r1, r2, r3: distancias del cuerpo 0 a los cuerpos 1, 2, 3 respectivamente
+  v_cuerpo: velocidad del cuerpo 0 en la componente que se deseea calcular la aceleracion
+  m1, m2, m3: masas de los cuerpos 1, 2 y 3 respectivamente
+  h: delta de tiempo que se quiere avanzar
+*/
+FLOAT *rungekutta4(FLOAT p_cuerpo, FLOAT p1, FLOAT p2, FLOAT p3,  FLOAT r1, FLOAT r2, FLOAT r3, FLOAT v_cuerpo, FLOAT m1, FLOAT m2, FLOAT m3, FLOAT h);
 
 
 
 int main(int argc, char **argv){
 
-  char *filename;
-  FLOAT *datos, *dens;
+  char *filename, *outfile, *years;
+  FLOAT *datos, *distancias;
   FLOAT x_sol, y_sol, z_sol, x_tierra, y_tierra, z_tierra, x_luna, y_luna, z_luna, x_ast, y_ast, z_ast;
   FLOAT v_x_sol, v_y_sol, v_z_sol, v_x_tierra, v_y_tierra, v_z_tierra, v_x_luna, v_y_luna, v_z_luna, v_x_ast, v_y_ast, v_z_ast;
   FLOAT masa_sol, masa_luna, masa_tierra, masa_ast;
-  FLOAT timestep, year, h, N;
-  int i, j, ciclos;
+  FLOAT timestep, year, h;
+  int i, j, ciclos, numeros_anios;
   FLOAT *cx_sol, *cy_sol, *cz_sol, *cx_tierra, *cy_tierra, *cz_tierra, *cx_luna, *cy_luna, *cz_luna, *cx_ast, *cy_ast, *cz_ast;
   //FLOAT d1, d2, d3;
 
   //Memory allocation de los punteros
   filename = malloc(10*sizeof(char));
-  dens = malloc(3*sizeof(FLOAT));
+  outfile = malloc(10*sizeof(char));
+  years = malloc(10*sizeof(char));
+  distancias = malloc(3*sizeof(FLOAT));
   cx_sol = malloc(2*sizeof(FLOAT));
   cy_sol = malloc(2*sizeof(FLOAT));
   cz_sol = malloc(2*sizeof(FLOAT));
@@ -87,16 +96,19 @@ int main(int argc, char **argv){
   //Inicializacion de variables que vienen por parametro
   filename = argv[1];
   timestep = atof(argv[2]);
+  numeros_anios = atoi(argv[3]); //Numero de anios para los que se quiere hacer el calculo de la orbita
   //year = argv[3];
 
-  h = timestep/4.0; //Como se va a mover cada cuerpo por aparte, el intervalo de movimiento para cada cuerpo sera esto
+  h = timestep/4.0; //Como se va a mover cada cuerpo por aparte, el intervalo de movimiento para cada cuerpo sera un cuarto del timestep total.
 
-  //Un anio tiene 31536000 segundos
-  N = 31536000/timestep;
-  ciclos = (int)100/timestep;
+  //Numero de ciclos que se van a hacer
+  ciclos = (int)numeros_anios/timestep;
 
   //Se llama la funcion para importar los datos. Mirar el archivo ic.txt para mirar a que corresponde cada valor en el arreglo
-  datos  = importacion_datos(filename);  
+  datos  = importacion_datos(filename);
+
+  //Generacion del nombre del archivo de salida de acuerdo al numero de anios que entra por parametro
+  snprintf(outfile, sizeof(char) * 32, "orbitas_%dyear.txt", numeros_anios);
 
   //Inicializacion de condiciones iniciales
   x_sol = datos[0];
@@ -132,7 +144,7 @@ int main(int argc, char **argv){
 
     //Imprimir archivo con coordenadas  
     FILE *out;
-    out = fopen("orbitas.txt", "a");
+    out = fopen(outfile, "a");
     if(!out){
       printf("Problemas escribiendo archivo\n");
       exit(1);
@@ -143,28 +155,28 @@ int main(int argc, char **argv){
     fclose(out);
 
     //Calculo de movimiento del sol
-    dens = calcular_distancia(x_sol, y_sol, z_sol, x_tierra, y_tierra, z_tierra, x_luna, y_luna, z_luna, x_ast, y_ast, z_ast);
-    cx_sol = rungekutta4(x_sol, x_tierra, x_luna, x_ast, dens[0], dens[1], dens[2], v_x_sol, masa_tierra, masa_luna, masa_ast, h);  
-    cy_sol = rungekutta4(y_sol, y_tierra, y_luna, y_ast, dens[0], dens[1], dens[2], v_y_sol, masa_tierra, masa_luna, masa_ast, h);
-    cz_sol = rungekutta4(z_sol, z_tierra, z_luna, z_ast, dens[0], dens[1], dens[2], v_z_sol, masa_tierra, masa_luna, masa_ast, h);
+    distancias = calcular_distancia(x_sol, y_sol, z_sol, x_tierra, y_tierra, z_tierra, x_luna, y_luna, z_luna, x_ast, y_ast, z_ast);
+    cx_sol = rungekutta4(x_sol, x_tierra, x_luna, x_ast, distancias[0], distancias[1], distancias[2], v_x_sol, masa_tierra, masa_luna, masa_ast, h);  
+    cy_sol = rungekutta4(y_sol, y_tierra, y_luna, y_ast, distancias[0], distancias[1], distancias[2], v_y_sol, masa_tierra, masa_luna, masa_ast, h);
+    cz_sol = rungekutta4(z_sol, z_tierra, z_luna, z_ast, distancias[0], distancias[1], distancias[2], v_z_sol, masa_tierra, masa_luna, masa_ast, h);
 
     //Calculo del movimiento de la tierra
-    dens = calcular_distancia(x_tierra, y_tierra, z_tierra, x_sol, y_sol, z_sol, x_luna, y_luna, z_luna, x_ast, y_ast, z_ast);
-    cx_tierra = rungekutta4(x_tierra, x_sol, x_luna, x_ast, dens[0], dens[1], dens[2], v_x_tierra, masa_sol, masa_luna, masa_ast, h);
-    cy_tierra = rungekutta4(y_tierra, y_sol, y_luna, y_ast, dens[0], dens[1], dens[2], v_y_tierra, masa_sol, masa_luna, masa_ast, h);
-    cz_tierra = rungekutta4(z_tierra, z_sol, z_luna, z_ast, dens[0], dens[1], dens[2], v_z_tierra, masa_sol, masa_luna, masa_ast, h);
+    distancias = calcular_distancia(x_tierra, y_tierra, z_tierra, x_sol, y_sol, z_sol, x_luna, y_luna, z_luna, x_ast, y_ast, z_ast);
+    cx_tierra = rungekutta4(x_tierra, x_sol, x_luna, x_ast, distancias[0], distancias[1], distancias[2], v_x_tierra, masa_sol, masa_luna, masa_ast, h);
+    cy_tierra = rungekutta4(y_tierra, y_sol, y_luna, y_ast, distancias[0], distancias[1], distancias[2], v_y_tierra, masa_sol, masa_luna, masa_ast, h);
+    cz_tierra = rungekutta4(z_tierra, z_sol, z_luna, z_ast, distancias[0], distancias[1], distancias[2], v_z_tierra, masa_sol, masa_luna, masa_ast, h);
 
     //Calculo del movimiento de la luna
-    dens = calcular_distancia(x_luna, y_luna, z_luna, x_sol, y_sol, z_sol, x_tierra, y_tierra, z_tierra, x_ast, y_ast, z_ast);
-    cx_luna = rungekutta4(x_luna, x_sol, x_tierra, x_ast, dens[0], dens[1], dens[2], v_x_luna, masa_sol, masa_tierra, masa_ast, h);
-    cy_luna = rungekutta4(y_luna, y_sol, y_tierra, y_ast, dens[0], dens[1], dens[2], v_y_luna, masa_sol, masa_tierra, masa_ast, h);
-    cz_luna = rungekutta4(z_luna, z_sol, z_tierra, z_ast, dens[0], dens[1], dens[2], v_z_luna, masa_sol, masa_tierra, masa_ast, h);
+    distancias = calcular_distancia(x_luna, y_luna, z_luna, x_sol, y_sol, z_sol, x_tierra, y_tierra, z_tierra, x_ast, y_ast, z_ast);
+    cx_luna = rungekutta4(x_luna, x_sol, x_tierra, x_ast, distancias[0], distancias[1], distancias[2], v_x_luna, masa_sol, masa_tierra, masa_ast, h);
+    cy_luna = rungekutta4(y_luna, y_sol, y_tierra, y_ast, distancias[0], distancias[1], distancias[2], v_y_luna, masa_sol, masa_tierra, masa_ast, h);
+    cz_luna = rungekutta4(z_luna, z_sol, z_tierra, z_ast, distancias[0], distancias[1], distancias[2], v_z_luna, masa_sol, masa_tierra, masa_ast, h);
 
     //Calculo del movimiento del asteroide
-    dens = calcular_distancia(x_ast, y_ast, z_ast, x_sol, y_sol, z_sol, x_tierra, y_tierra, z_tierra, x_luna, y_luna, z_luna);
-    cx_ast = rungekutta4(x_ast, x_sol, x_tierra, x_luna, dens[0], dens[1], dens[2], v_x_ast, masa_sol, masa_tierra, masa_luna, h);
-    cy_ast = rungekutta4(y_ast, y_sol, y_tierra, y_luna, dens[0], dens[1], dens[2], v_y_ast, masa_sol, masa_tierra, masa_luna, h);
-    cz_ast = rungekutta4(z_ast, z_sol, z_tierra, z_luna, dens[0], dens[1], dens[2], v_z_ast, masa_sol, masa_tierra, masa_luna, h);
+    distancias = calcular_distancia(x_ast, y_ast, z_ast, x_sol, y_sol, z_sol, x_tierra, y_tierra, z_tierra, x_luna, y_luna, z_luna);
+    cx_ast = rungekutta4(x_ast, x_sol, x_tierra, x_luna, distancias[0], distancias[1], distancias[2], v_x_ast, masa_sol, masa_tierra, masa_luna, h);
+    cy_ast = rungekutta4(y_ast, y_sol, y_tierra, y_luna, distancias[0], distancias[1], distancias[2], v_y_ast, masa_sol, masa_tierra, masa_luna, h);
+    cz_ast = rungekutta4(z_ast, z_sol, z_tierra, z_luna, distancias[0], distancias[1], distancias[2], v_z_ast, masa_sol, masa_tierra, masa_luna, h);
 
     //Actualizacion de posiciones y velocidades
     x_sol = cx_sol[0];
@@ -210,8 +222,6 @@ FLOAT ecuacion_gravedad(FLOAT m_1, FLOAT m_2, FLOAT m_3, FLOAT p0, FLOAT p1, FLO
   //Calculo para componente en deseada0.
   aceleracion = -G_GRAV*((m_1*(p0-p1)/pow(r1, 1.5)) + (m_2*(p0-p2)/pow(r2, 1.5)) + (m_3*(p0-p3)/pow(r3, 1.5)));
 
-  printf("%g\n", aceleracion);
-
   return aceleracion;
 }
 
@@ -227,7 +237,7 @@ FLOAT *calcular_distancia(FLOAT x0, FLOAT y0, FLOAT z0, FLOAT x1, FLOAT y1, FLOA
   return dis;
 }
 
-FLOAT *rungekutta4(FLOAT p_cuerpo, FLOAT p1, FLOAT p2, FLOAT p3,  FLOAT den1, FLOAT den2, FLOAT den3, FLOAT v_cuerpo, FLOAT m1, FLOAT m2, FLOAT m3, FLOAT h){
+FLOAT *rungekutta4(FLOAT p_cuerpo, FLOAT p1, FLOAT p2, FLOAT p3,  FLOAT r1, FLOAT r2, FLOAT r3, FLOAT v_cuerpo, FLOAT m1, FLOAT m2, FLOAT m3, FLOAT h){
 
   FLOAT *nuevas_coordenadas;
   FLOAT k1_posicion, k1_velocidad, k2_posicion, k2_velocidad,k3_posicion, k3_velocidad,k4_posicion, k4_velocidad, kprom_posicion, kprom_velocidad;
@@ -235,29 +245,26 @@ FLOAT *rungekutta4(FLOAT p_cuerpo, FLOAT p1, FLOAT p2, FLOAT p3,  FLOAT den1, FL
 
   nuevas_coordenadas = malloc(2*sizeof(FLOAT));
 
-  acel = ecuacion_gravedad(m1, m2, m3, p_cuerpo, p1, p2, p3, den1, den2, den3);
-
-
   k1_posicion = v_cuerpo;
-  k1_velocidad = acel;
+  k1_velocidad = ecuacion_gravedad(m1, m2, m3, p_cuerpo, p1, p2, p3, r1, r2, r3);
 
   //Primer paso
   p_1 = p_cuerpo + h*0.5*k1_posicion;
   v_1 = v_cuerpo + h*0.5*k1_velocidad;
   k2_posicion = v_1;
-  k2_velocidad = acel;
+  k2_velocidad = ecuacion_gravedad(m1, m2, m3, p_1, p1, p2, p3, r1, r2, r3);
 
   //Segundo paso
   p_2 = p_cuerpo + h*0.5*k2_posicion;
   v_2 = v_cuerpo + h*0.5*k2_velocidad;
   k3_posicion = v_2;
-  k3_velocidad = acel;
+  k3_velocidad = ecuacion_gravedad(m1, m2, m3, p_2, p1, p2, p3, r1, r2, r3);
 
   //Tercer paso
   p_3 = p_cuerpo + h*k3_posicion;
   v_3 = v_cuerpo + h*k3_velocidad;
   k4_posicion = v_3;
-  k4_velocidad = acel;
+  k4_velocidad = ecuacion_gravedad(m1, m2, m3, p_3, p1, p2, p3, r1, r2, r3);
 
   //Cuarto paso
   kprom_posicion = (1.0/6.0)*(k1_posicion + 2.0*k2_posicion + 2.0*k3_posicion + k4_posicion);
