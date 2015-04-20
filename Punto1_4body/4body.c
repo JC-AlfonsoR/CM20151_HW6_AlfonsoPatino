@@ -99,7 +99,7 @@ int main(int argc, char **argv){
   numeros_anios = atoi(argv[3]); //Numero de anios para los que se quiere hacer el calculo de la orbita
   //year = argv[3];
 
-  h = timestep/4.0; //Como se va a mover cada cuerpo por aparte, el intervalo de movimiento para cada cuerpo sera un cuarto del timestep total.
+  h = timestep;
 
   //Numero de ciclos que se van a hacer
   ciclos = (int)numeros_anios/timestep;
