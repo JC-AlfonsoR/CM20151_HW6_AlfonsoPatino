@@ -64,7 +64,6 @@ int main(int argc, char **argv){
 
   /*implementation of a simple Euler integration*/
   for(i=0;i<n_steps;i++){
-    printf("%d\n", i);
     get_acceleration(a_x, a_y, a_z, x, y, z, mass, n_points);
     for(j=0;j<n_points;j++){
       FLOAT *ks;
