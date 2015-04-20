@@ -35,11 +35,9 @@ int main(int argc, char **argv){
   FLOAT *mass;
 
   /*timestep variables*/
-  FLOAT delta_t= 0.001;
-  int n_steps = (int)(100.0/delta_t);
+  FLOAT delta_t= 0.01;
+  int n_steps = (int)(1000/delta_t);
   int n_points = 4;
-  FLOAT radius = 100.0;
-  FLOAT unit_mass = 1.0; 
   FLOAT *ic;
   int i,j;
   
@@ -66,6 +64,7 @@ int main(int argc, char **argv){
   for(i=0;i<n_steps;i++){
     get_acceleration(a_x, a_y, a_z, x, y, z, mass, n_points);
     for(j=0;j<n_points;j++){
+      
       FLOAT *ks;
       ks = malloc(2*sizeof(FLOAT));
       ks = rungekutta4(x[j] , v_x[j], a_x[j], delta_t);
@@ -79,7 +78,6 @@ int main(int argc, char **argv){
       ks = rungekutta4(z[j], v_z[j], a_z[j], delta_t);
       z[j] = z[j] + delta_t * ks[0];   
       v_z[j] = v_z[j] + delta_t * ks[1] ;
-
     }
     print_status(x,y,z,v_x,v_y,v_z, a_x, a_y, a_z, n_points);
   }  
