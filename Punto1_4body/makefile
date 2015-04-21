@@ -1,4 +1,4 @@
-all: orbitas_1year.txt orbitas_1000year.txt 4body.x orbitas-1000yr.png orbitas_1yr.png
+all: orbitas_1year.txt orbitas_1000year.txt 4body.x orbitas-1000yr.png orbitas-1yr.png
 
 orbitas-1000yr.png: trayectorias.py orbitas_1000year.txt
 	python trayectorias.py
@@ -15,4 +15,4 @@ orbitas_1year.txt: ./4body.x ic.txt
 	cc 4body.c -o 4body.x -lm
 
 clean:
-	rm -f orbitas_1year.txt orbitas_1000year.txt
+	rm -f orbitas_1year.txt orbitas_1000year.txt orbitas-1000yr.png orbitas-1yr.png 
