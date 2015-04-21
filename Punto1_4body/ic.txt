@@ -17,7 +17,7 @@ v_x_tierra    0.0
 v_y_tierra    6.328
 v_z_tierra    0.0
 v_x_luna    0.0
-v_y_luna    0.2158
+v_y_luna    6.543
 v_z_luna    0.0
 v_x_ast		331.2
 v_y_ast		0.0
