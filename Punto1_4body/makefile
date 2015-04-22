@@ -15,4 +15,4 @@ orbitas_1year.txt: ./4body.x ic.txt
 	cc 4body.c -o 4body.x -lm
 
 clean:
-	rm -f orbitas_1year.txt orbitas_1000year.txt orbitas-1000yr.png orbitas-1yr.png 
+	rm -f orbitas_1year.txt orbitas_1000year.txt orbitas-1000yr.png orbitas-1yr.png 4body.x
