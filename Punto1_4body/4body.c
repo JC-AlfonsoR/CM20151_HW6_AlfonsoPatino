@@ -71,7 +71,7 @@ int main(int argc, char **argv){
   FLOAT v_x_sol, v_y_sol, v_z_sol, v_x_tierra, v_y_tierra, v_z_tierra, v_x_luna, v_y_luna, v_z_luna, v_x_ast, v_y_ast, v_z_ast;
   FLOAT masa_sol, masa_luna, masa_tierra, masa_ast;
   FLOAT timestep, year, h;
-  int i, j, ciclos, numeros_anios;
+  int i, j, ciclos, numeros_anios, choque;
   FLOAT *cx_sol, *cy_sol, *cz_sol, *cx_tierra, *cy_tierra, *cz_tierra, *cx_luna, *cy_luna, *cz_luna, *cx_ast, *cy_ast, *cz_ast;
   //FLOAT d1, d2, d3;
 
@@ -204,7 +204,19 @@ int main(int argc, char **argv){
     v_y_ast = cy_ast[1];
     v_z_ast = cz_ast[1];   
 
-    printf("%d\n", i);
+    //Determinar si hay choque
+
+    choque = 0;
+
+    if(x_tierra == x_ast && y_tierra == y_ast && z_tierra == z_ast){
+      choque = 1;
+      printf("EL ASTEROIFR CHOCARA CON LA TIERRA EN %f YEARS\n", i*timestep);
+    }
+
+    if(choque == 0 && i == ciclos-1){
+      printf("EL ASTEROIDE NO CHOCARA CON LA TIERRA EN LOS PROXIMOS %d YEARS \n", numeros_anios);
+    }
+
 
   }
 
